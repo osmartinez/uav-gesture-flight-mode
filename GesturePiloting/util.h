@@ -10,7 +10,7 @@
 
 #ifdef WIN32
 #include <conio.h>
-int wasKeyboardHit()
+int key_pressed()
 {
 	return (int)_kbhit();
 }
@@ -21,7 +21,12 @@ int wasKeyboardHit()
 #include <stdlib.h>
 #include <termios.h>
 #include <fcntl.h>
-int wasKeyboardHit()
+
+/// <summary>
+/// Detects a key pressed
+/// </summary>
+/// <returns>1 if pressed, else 0</returns>
+int key_pressed()
 {
 	struct termios oldt, newt;
 	int ch;
@@ -58,43 +63,53 @@ int wasKeyboardHit()
 }
 #endif // WIN32
 
-float distancia_euclidea(nite::Point3f a, nite::Point3f b) {
+/// <summary>
+/// Calculates the euclidean distance between two 3d points
+/// </summary>
+/// <returns>distance between two points</returns>
+float euclidean_distance(nite::Point3f a, nite::Point3f b) {
 	return sqrt((pow(a.x - b.x, 2)) + (pow(a.y - b.y, 2)) + (pow(a.z - b.z, 2)));
 }
 
+/// <summary>
+/// Transforms radians to degrees
+/// </summary>
+/// <returns>equivalence in degrees of @rad radians</returns>
 float rad_to_deg(float rad) {
 	return rad * (180.0 / PI);
 }
 
-float ang_to_throttle(float ang) {
+/// <summary>
+/// Transforms the elbow angle to a right throttle value. Angle is limited by the following range: [-80,80]
+/// </summary>
+/// <returns>throttle value</returns>
+float ang_to_throttle(float ang,float min_throttle,float max_throttle) {
 	float norm = ang;
-	if (norm < -80) {
-		norm = -80.0;
-	}
-	else if (norm > 80) {
-		norm = 80.0;
+	//if (norm < -80) {
+	//	norm = -80.0;
+	//}
+	//else if (norm > 80) {
+	//	norm = 80.0;
+	//}
+
+	//float res = ((norm * 1000) / 160) + 1500;
+	float res = ((norm*min_throttle) / 200) + ((max_throttle + min_throttle) / 2);
+	if (res < min_throttle) {
+		return min_throttle;
 	}
 
-	float res = ((norm * 1000) / 160) + 1500;
-	if (res < 1050) {
-		return 1000;
+	if (res > max_throttle) {
+		return max_throttle;
 	}
-	if (res > 1920) {
-		return 2000;
-	}
+	//if (res < min_throttle) {
+	//	res = min_throttle;
+	//}
+	//if (res > max_throttle) {
+	//	res = max_throttle;
+	//}
+
 
 	return res;
-}
-
-char* val_to_char(int val) {
-	if (val == 1) {
-		return "1550";
-	}
-	else if (val == -1) {
-		return "1450";
-	}
-
-	return "1500";
 }
 
 #endif // _NITE_SAMPLE_UTILITIES_H_
